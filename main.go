@@ -1,7 +1,7 @@
 package main
 
 /*
- * ./restad2pve-groups --dest-group=CSR --pve-relm=byu --src-group=physics-csrs --restad-server=avari:1234> users.cfg
+ * ./restad2pve-groups --dest-group=CSR --pve-realm=byu --src-group=physics-csrs --restad-server=avari:1234> users.cfg
  *  N.B., this depends on RESTAD (see http://github.com/kalebo/RESTAD ) being running
  */
 
@@ -17,7 +17,7 @@ import (
 
 type GroupUsers struct {
 	GroupName string
-	Relm      string
+	Realm     string
 	Users     []RestADUser
 }
 
@@ -32,10 +32,10 @@ type RestADMembers struct {
 }
 
 const tpml_str string = `
-{{range .Users}}user:{{.NetId}}@{{$.Relm}}:1:0:{{.Name}}:::::
+{{range .Users}}user:{{.NetId}}@{{$.Realm}}:1:0:{{.Name}}:::::
 {{else}}{{end}}
 
-group:{{.GroupName}}:{{range $index, $element := .Users}}{{if $index}},{{end}}{{.NetId}}@{{$.Relm}}{{else}}{{end}}::
+group:{{.GroupName}}:{{range $index, $element := .Users}}{{if $index}},{{end}}{{.NetId}}@{{$.Realm}}{{else}}{{end}}::
 
 
 acl:1:/:@{{.GroupName}}:Administrator:
@@ -44,11 +44,11 @@ acl:1:/:@{{.GroupName}}:Administrator:
 func main() {
 	destPtr := flag.String("dest-group", "", "The PVE group to have administrator role and users added")
 	srcPtr := flag.String("src-group", "", "The AD group to pull the users from")
-	relmPtr := flag.String("pve-relm", "", "The realm in pve that corresponds to your AD")
+	realmPtr := flag.String("pve-realm", "", "The realm in pve that corresponds to your AD")
 	restadPtr := flag.String("restad-server", "", "The hostname and port of your RESTAD server connected to AD")
 	flag.Parse()
 
-	if *destPtr == "" || *srcPtr == "" || *relmPtr == "" || *restadPtr == "" {
+	if *destPtr == "" || *srcPtr == "" || *realmPtr == "" || *restadPtr == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -68,7 +68,7 @@ func main() {
 
 	tmpl, _ := template.New("user.cfg").Parse(tpml_str)
 
-	params := GroupUsers{*destPtr, *relmPtr, members.Users}
+	params := GroupUsers{*destPtr, *realmPtr, members.Users}
 
 	tmpl.Execute(os.Stdout, params)
 }
