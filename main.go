@@ -8,6 +8,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"text/template"
@@ -31,7 +32,6 @@ type RestADMembers struct {
 }
 
 const tpml_str string = `
-user:root@pam:1:0:::physics-csr@byu.edu:::
 {{range .Users}}user:{{.NetId}}@{{$.Relm}}:1:0:{{.Name}}:::::
 {{else}}{{end}}
 
@@ -53,6 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("user:root@pam:1:0:::physics-csr@byu.edu:::")
 	http_client := &http.Client{Timeout: 5 * time.Second} // make sure we don't wait forever
 
 	resp, err := http_client.Get("http://" + *restadPtr + "/api/group/" + *srcPtr + "/members")
